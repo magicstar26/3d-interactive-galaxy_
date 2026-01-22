@@ -22,6 +22,26 @@ function getPoints(shape) {
         const u = Math.random() * 2 - 1;
         const idx = i * 3;
 
+        // ... di dalam fungsi getPoints(shape)
+        if (shape === 'text_i') {
+            // Bentuk Huruf I (Batang vertikal)
+            x = (Math.random() - 0.5) * 2;
+            y = (Math.random() - 0.5) * 20;
+            z = (Math.random() - 0.5) * 2;
+        } else if (shape === 'text_love') {
+            // Kita pakai bentuk HATI yang sudah ada tapi lebih ramping
+            const a = Math.random() * Math.PI * 2;
+            x = 16 * Math.pow(Math.sin(a), 3) * 0.5;
+            y = (13 * Math.cos(a) - 5 * Math.cos(2*a) - 2 * Math.cos(3*a) - Math.cos(4*a)) * 0.5;
+            z = (Math.random() - 0.5) * 2;
+        } else if (shape === 'text_you') {
+            // Bentuk Huruf U (Melengkung)
+            const angle = (Math.random() * Math.PI); // Setengah lingkaran
+            x = 10 * Math.cos(angle + Math.PI);
+            y = 10 * Math.sin(angle + Math.PI) + (Math.random() * 10); // Tarik ke atas agar jadi U
+            z = (Math.random() - 0.5) * 2;
+        } 
+// ...
         if (shape === 'heart') {
             const a = Math.random() * Math.PI * 2;
             x = 16 * Math.pow(Math.sin(a), 3) * 0.7;
@@ -144,10 +164,20 @@ function animate() {
             const fingers = [8, 12, 16, 20].filter(idx => hand[idx].y < hand[idx-2].y).length;
             
             let shape = "sphere";
-            if (isLove) shape = "love_sign";
-            else if (fingers === 0) shape = 'heart'; 
-            else if (fingers === 3) shape = 'saturn'; 
-            else if (fingers >= 4) shape = 'flower';
+            
+            if (isLove) {
+                shape = "text_love";
+            } else if (fingers === 1) {
+                shape = "text_i";
+            } else if (fingers === 2) {
+                shape = "text_you";
+            } else if (fingers === 3) {
+                shape = "saturn";
+            } else if (fingers === 0) {
+                shape = "heart";
+            } else {
+                shape = "flower";
+            }
             
             if (shape !== lastShape) {
                 targetPositions = getPoints(shape);
@@ -158,5 +188,6 @@ function animate() {
     }
     renderer.render(scene, camera);
 }
+
 
 init();
