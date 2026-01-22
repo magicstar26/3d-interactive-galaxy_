@@ -18,62 +18,36 @@ function getPoints(shape) {
     const pts = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
         let x, y, z;
-        const t = Math.random() * Math.PI * 2;
-        const u = Math.random() * 2 - 1;
         const idx = i * 3;
 
-        // ... di dalam fungsi getPoints(shape)
         if (shape === 'text_i') {
-            // Bentuk Huruf I (Batang vertikal)
-            x = (Math.random() - 0.5) * 2;
-            y = (Math.random() - 0.5) * 20;
+            // Huruf I - Garis Vertikal Tebal
+            x = (Math.random() - 0.5) * 4; 
+            y = (Math.random() - 0.5) * 25; 
             z = (Math.random() - 0.5) * 2;
         } else if (shape === 'text_love') {
-            // Kita pakai bentuk HATI yang sudah ada tapi lebih ramping
+            // Hati (Love) - Padat
             const a = Math.random() * Math.PI * 2;
-            x = 16 * Math.pow(Math.sin(a), 3) * 0.5;
-            y = (13 * Math.cos(a) - 5 * Math.cos(2*a) - 2 * Math.cos(3*a) - Math.cos(4*a)) * 0.5;
-            z = (Math.random() - 0.5) * 2;
+            x = 16 * Math.pow(Math.sin(a), 3) * 0.6;
+            y = (13 * Math.cos(a) - 5 * Math.cos(2*a) - 2 * Math.cos(3*a) - Math.cos(4*a)) * 0.6;
+            z = (Math.random() - 0.5) * 4;
         } else if (shape === 'text_you') {
-            // Bentuk Huruf U (Melengkung)
-            const angle = (Math.random() * Math.PI); // Setengah lingkaran
-            x = 10 * Math.cos(angle + Math.PI);
-            y = 10 * Math.sin(angle + Math.PI) + (Math.random() * 10); // Tarik ke atas agar jadi U
-            z = (Math.random() - 0.5) * 2;
-        } 
-// ...
-        if (shape === 'heart') {
-            const a = Math.random() * Math.PI * 2;
-            x = 16 * Math.pow(Math.sin(a), 3) * 0.7;
-            y = (13 * Math.cos(a) - 5 * Math.cos(2*a) - 2 * Math.cos(3*a) - Math.cos(4*a)) * 0.7;
-            z = (Math.random() - 0.5) * 2;
-        } else if (shape === 'love_sign') {
-            // Bentuk Mini Heart (🤞🏻 Finger Heart)
-            const a = Math.random() * Math.PI * 2;
-            x = 8 * Math.pow(Math.sin(a), 3) * 0.4;
-            y = (13 * Math.cos(a) - 5 * Math.cos(2*a) - 2 * Math.cos(3*a) - Math.cos(4*a)) * 0.4 + 10;
-            z = (Math.random() - 0.5) * 1;
-        } else if (shape === 'saturn') {
-            if (i < particleCount * 0.4) {
-                const r = 7;
-                x = r * Math.sqrt(1 - u * u) * Math.cos(t);
-                y = r * Math.sqrt(1 - u * u) * Math.sin(t);
-                z = r * u;
+            // Huruf U - Melengkung di bawah, lurus ke atas
+            const t = Math.random() * Math.PI; // setengah lingkaran
+            if (i < particleCount * 0.5) {
+                // Lengkungan bawah
+                x = 10 * Math.cos(t + Math.PI);
+                y = 10 * Math.sin(t + Math.PI);
             } else {
-                const r = 11 + Math.random() * 6;
-                x = r * Math.cos(t);
-                y = (Math.random() - 0.5) * 0.4;
-                z = r * Math.sin(t);
-                const tz = z * Math.cos(0.6) - y * Math.sin(0.6);
-                const ty = z * Math.sin(0.6) + y * Math.cos(0.6);
-                y = ty; z = tz;
+                // Batang ke atas
+                x = (Math.random() > 0.5 ? 10 : -10);
+                y = Math.random() * 15;
             }
-        } else if (shape === 'flower') {
-            const r = 10 * Math.cos(5 * t);
-            x = r * Math.cos(t);
-            y = r * Math.sin(t);
-            z = u * 3;
+            z = (Math.random() - 0.5) * 2;
         } else {
+            // Default Sphere
+            const t = Math.random() * Math.PI * 2;
+            const u = Math.random() * 2 - 1;
             const r = 15;
             x = r * Math.sqrt(1 - u * u) * Math.cos(t);
             y = r * Math.sqrt(1 - u * u) * Math.sin(t);
@@ -164,21 +138,20 @@ function animate() {
             const fingers = [8, 12, 16, 20].filter(idx => hand[idx].y < hand[idx-2].y).length;
             
             let shape = "sphere";
-            
             if (isLove) {
-                shape = "text_love";
+                shape = "text_love"; // Gestur 🤞🏻
             } else if (fingers === 1) {
-                shape = "text_i";
+                shape = "text_i";    // Gestur ☝️
             } else if (fingers === 2) {
-                shape = "text_you";
+                shape = "text_you";  // Gestur ✌️
             } else if (fingers === 3) {
-                shape = "saturn";
+                shape = "saturn";    // Gestur 🤟
             } else if (fingers === 0) {
-                shape = "heart";
+                shape = "heart";     // Gestur ✊
             } else {
-                shape = "flower";
+                shape = "flower";    // Gestur ✋
             }
-            
+                        
             if (shape !== lastShape) {
                 targetPositions = getPoints(shape);
                 lastShape = shape;
@@ -191,3 +164,4 @@ function animate() {
 
 
 init();
+
