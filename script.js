@@ -3,7 +3,7 @@ import { FilesetResolver, HandLandmarker, DrawingUtils } from "https://cdn.jsdel
 
 let scene, camera, renderer, particles;
 let handLandmarker, drawingUtils;
-const particleCount = 50000; 
+const particleCount = 25000; 
 let targetPositions = new Float32Array(particleCount * 3);
 let handPos = new THREE.Vector3(0, 0, 0);
 let lastShape = "";
@@ -13,7 +13,7 @@ const canvasElement = document.getElementById('hand-canvas');
 const canvasCtx = canvasElement.getContext('2d');
 const statusText = document.getElementById('gesture-status');
 
-// --- GENERATOR BENTUK ---
+// --- GENERATOR BENTUK (DEKAT & PADAT) ---
 function getPoints(shape) {
     const pts = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
@@ -22,39 +22,31 @@ function getPoints(shape) {
         const u = Math.random() * 2 - 1;
         const idx = i * 3;
 
+        // Ukuran bentuk diperkecil agar terlihat lebih "dekat" dan padat
         if (shape === 'heart') {
             const a = Math.random() * Math.PI * 2;
-            x = 16 * Math.pow(Math.sin(a), 3) * 0.7;
-            y = (13 * Math.cos(a) - 5 * Math.cos(2*a) - 2 * Math.cos(3*a) - Math.cos(4*a)) * 0.7;
+            x = 12 * Math.pow(Math.sin(a), 3) * 0.5;
+            y = (13 * Math.cos(a) - 5 * Math.cos(2*a) - 2 * Math.cos(3*a) - Math.cos(4*a)) * 0.5;
             z = (Math.random() - 0.5) * 2;
         } else if (shape === 'love_sign') {
-            // Bentuk Mini Heart (🤞🏻 Finger Heart)
             const a = Math.random() * Math.PI * 2;
-            x = 8 * Math.pow(Math.sin(a), 3) * 0.4;
-            y = (13 * Math.cos(a) - 5 * Math.cos(2*a) - 2 * Math.cos(3*a) - Math.cos(4*a)) * 0.4 + 10;
+            x = 6 * Math.pow(Math.sin(a), 3) * 0.4;
+            y = (13 * Math.cos(a) - 5 * Math.cos(2*a) - 2 * Math.cos(3*a) - Math.cos(4*a)) * 0.4 + 5;
             z = (Math.random() - 0.5) * 1;
         } else if (shape === 'saturn') {
             if (i < particleCount * 0.4) {
-                const r = 7;
+                const r = 5;
                 x = r * Math.sqrt(1 - u * u) * Math.cos(t);
                 y = r * Math.sqrt(1 - u * u) * Math.sin(t);
                 z = r * u;
             } else {
-                const r = 11 + Math.random() * 6;
+                const r = 8 + Math.random() * 4;
                 x = r * Math.cos(t);
-                y = (Math.random() - 0.5) * 0.4;
+                y = (Math.random() - 0.5) * 0.3;
                 z = r * Math.sin(t);
-                const tz = z * Math.cos(0.6) - y * Math.sin(0.6);
-                const ty = z * Math.sin(0.6) + y * Math.cos(0.6);
-                y = ty; z = tz;
             }
-        } else if (shape === 'flower') {
-            const r = 10 * Math.cos(5 * t);
-            x = r * Math.cos(t);
-            y = r * Math.sin(t);
-            z = u * 3;
         } else {
-            const r = 15;
+            const r = 10;
             x = r * Math.sqrt(1 - u * u) * Math.cos(t);
             y = r * Math.sqrt(1 - u * u) * Math.sin(t);
             z = r * u;
@@ -66,8 +58,9 @@ function getPoints(shape) {
 
 async function init() {
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    camera.position.z = 50;
+    // Camera didekatkan (Z: 35) agar partikel terasa di depan mata
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.z = 35;
 
     renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas3d'), antialias: false });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -78,7 +71,7 @@ async function init() {
     geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(particleCount * 3), 3));
 
     const mat = new THREE.PointsMaterial({
-        size: 0.1, color: 0x00ffcc, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
+        size: 0.12, color: 0x00ffcc, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
     });
 
     particles = new THREE.Points(geo, mat);
@@ -107,14 +100,15 @@ function animate() {
     const p = particles.geometry.attributes.position.array;
 
     for (let i = 0; i < p.length; i += 3) {
+        // Efek Magnet & Arus (Ditingkatkan kecepatannya)
         const dx = handPos.x - p[i];
         const dy = handPos.y - p[i+1];
         const dist = Math.sqrt(dx*dx + dy*dy);
-        const force = Math.max(0, (30 - dist) * 0.015); 
+        const force = Math.max(0, (25 - dist) * 0.02); // Power magnet lebih kencang
 
-        p[i] += (targetPositions[i] - p[i]) * 0.15 + (dx * force);
-        p[i+1] += (targetPositions[i+1] - p[i+1]) * 0.15 + (dy * force);
-        p[i+2] += (targetPositions[i+2] - p[i+2]) * 0.15;
+        p[i] += (targetPositions[i] - p[i]) * 0.18 + (dx * force);
+        p[i+1] += (targetPositions[i+1] - p[i+1]) * 0.18 + (dy * force);
+        p[i+2] += (targetPositions[i+2] - p[i+2]) * 0.18;
     }
     particles.geometry.attributes.position.needsUpdate = true;
 
@@ -124,36 +118,39 @@ function animate() {
         
         if (results.landmarks && results.landmarks.length > 0) {
             const hand = results.landmarks[0];
-            drawingUtils.drawConnectors(hand, HandLandmarker.HAND_CONNECTIONS, { color: "#00FFCC", lineWidth: 3 });
+            drawingUtils.drawConnectors(hand, HandLandmarker.HAND_CONNECTIONS, { color: "#00FFCC", lineWidth: 2 });
 
-            // LOGIKA GESTURE LOVE SIGN (🤞🏻)
+            // --- FITUR PUTAR-PUTAR (Rotasi berdasarkan kemiringan tangan) ---
+            // Menggunakan koordinat pergelangan tangan (0) dan jari tengah (9)
+            const rotationY = (hand[9].x - 0.5) * Math.PI;
+            const rotationX = (hand[9].y - 0.5) * Math.PI;
+            particles.rotation.y = THREE.MathUtils.lerp(particles.rotation.y, rotationY, 0.1);
+            particles.rotation.x = THREE.MathUtils.lerp(particles.rotation.x, rotationX, 0.1);
+
+            // --- ZOOM BERDASARKAN JARAK ---
+            const s = Math.hypot(hand[5].x - hand[17].x, hand[5].y - hand[17].y);
+            const scale = Math.max(0.3, s * 10);
+            particles.scale.lerp(new THREE.Vector3(scale, scale, scale), 0.2);
+
+            // --- POSISI TANGAN (FOLLOW) ---
+            handPos.x = (hand[9].x - 0.5) * -60;
+            handPos.y = (hand[9].y - 0.5) * -45;
+
+            // --- GESTURE CHECK ---
             const thumbTip = hand[4];
             const indexTip = hand[8];
             const distLove = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y);
-            const isLove = distLove < 0.04 && hand[12].y > hand[10].y; // Jempol telunjuk nempel, jari lain tekuk
-
-            // Scaler (Distance)
-            const s = Math.hypot(hand[5].x - hand[17].x, hand[5].y - hand[17].y);
-            const scale = Math.max(0.2, s * 8);
-            particles.scale.lerp(new THREE.Vector3(scale, scale, scale), 0.2);
-
-            // X-Y Follow
-            handPos.x = (hand[9].x - 0.5) * -80;
-            handPos.y = (hand[9].y - 0.5) * -60;
+            const isLove = distLove < 0.04 && hand[12].y > hand[10].y;
 
             const fingers = [8, 12, 16, 20].filter(idx => hand[idx].y < hand[idx-2].y).length;
             
-            let shape = "sphere";
-            if (isLove) shape = "love_sign";
-            else if (fingers === 0) shape = 'heart'; 
-            else if (fingers === 3) shape = 'saturn'; 
-            else if (fingers >= 4) shape = 'flower';
+            let shape = isLove ? "love_sign" : (fingers === 0 ? 'heart' : (fingers === 3 ? 'saturn' : (fingers >= 4 ? 'flower' : 'sphere')));
             
             if (shape !== lastShape) {
                 targetPositions = getPoints(shape);
                 lastShape = shape;
             }
-            statusText.innerText = `Bentuk: ${shape.toUpperCase()}`;
+            statusText.innerText = `Mode: ${shape.toUpperCase()}`;
         }
     }
     renderer.render(scene, camera);
