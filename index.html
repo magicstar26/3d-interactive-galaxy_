@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Particle Gesture Control</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm/vision_bundle.js"></script>
+</head>
+<body>
+    <video id="webcam" autoplay playsinline style="display: none;"></video>
+    
+    <canvas id="canvas3d"></canvas>
+
+    <div id="ui-panel">
+        <h3>Control Panel</h3>
+        <div class="control-group">
+            <label>Shape:</label>
+            <select id="shapeSelector">
+                <option value="heart">Heart</option>
+                <option value="flower">Flower</option>
+                <option value="firework">Firework</option>
+                <option value="saturn">Saturn</option>
+                <option value="A">Letter A</option>
+                <option value="Z">Letter Z</option>
+                <option value="M">Letter M</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>Color:</label>
+            <input type="color" id="particleColor" value="#00ffcc">
+        </div>
+        <div class="status">
+            Hand Status: <span id="gesture-status">Wait...</span>
+        </div>
+    </div>
+
+    <div id="ui-panel">
+    <h3>Interactive Galaxy</h3>
+    <div id="gesture-status">Inisialisasi...</div>
+    <div class="control-group">
+        <label>Warna Partikel:</label>
+        <input type="color" id="particleColor" value="#00ffcc">
+    </div>
+</div>
+
+<div id="camera-container">
+    <video id="webcam" autoplay playsinline></video>
+    <canvas id="hand-canvas"></canvas>
+</div>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+            }
+        }
+    </script>
+    <script type="module" src="script.js"></script>
+</body>
+</html>
